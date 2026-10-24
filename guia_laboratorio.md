@@ -25,6 +25,7 @@ Esta guía te explica detalladamente:
 ### 📋 Estado Inicial del Sistema
 - **Memoria física total:** 96 KB dividida en 8 huecos libres ordenados por dirección física:
   `[20 KB, 7 KB, 10 KB, 12 KB, 5 KB, 9 KB, 15 KB, 18 KB]`.
+> ℹ️ **Nota sobre la representación simplificada:** Los huecos pertenecen a distintas zonas no contiguas de la memoria. Los procesos ocupados que los separan se omiten en esta representación simplificada para concentrar el análisis en la política de selección del hueco.
 - **Cola de solicitudes sucesivas:**
   1. Solicitud $a$: Proceso **P1** = `12 KB`
   2. Solicitud $b$: Proceso **P2** = `9 KB`
@@ -38,7 +39,7 @@ Esta guía te explica detalladamente:
 1. **Configuración:**
    - Asegúrate de tener seleccionado el escenario **`📋 1. Caso Base: 8 Huecos`**.
    - En el menú desplegable **Estrategia**, selecciona **`Primer Ajuste (First-Fit)`**.
-   - Si ya realizaste pruebas previas, haz clic en **`🔄 Reiniciar Memoria`**.
+   - Si ya realizaste pruebas previas, haz clic en **`🔄 Reiniciar escenario actual`**.
 2. **Procedimiento Paso a Paso:**
    - Haz clic en **`⏭️ Siguiente Solicitud (1/3)`** para asignar **P1 (12 KB)**:
      - *Búsqueda:* El algoritmo examina desde la dirección 0. El primer hueco es de **20 KB**. Como $12 \le 20$, lo asigna allí.
@@ -60,7 +61,7 @@ Esta guía te explica detalladamente:
 > **Objetivo:** Comprobar cómo la búsqueda completa del hueco con menor residuo optimiza el espacio o crea pequeños huecos inutilizables.
 
 1. **Configuración:**
-   - Haz clic en **`🔄 Reiniciar Memoria`**.
+   - Haz clic en **`🔄 Reiniciar escenario actual`**.
    - En **Estrategia**, selecciona **`Mejor Ajuste (Best-Fit)`**.
 2. **Procedimiento:**
    - Ejecuta las 3 solicitudes paso a paso:
@@ -78,7 +79,7 @@ Esta guía te explica detalladamente:
 > **Objetivo:** Comprobar la estrategia que busca dejar los huecos residuales más grandes posibles.
 
 1. **Configuración:**
-   - Haz clic en **`🔄 Reiniciar Memoria`**.
+   - Haz clic en **`🔄 Reiniciar escenario actual`**.
    - En **Estrategia**, selecciona **`Peor Ajuste (Worst-Fit)`**.
 2. **Procedimiento:**
    - Ejecuta las 3 solicitudes:
@@ -220,7 +221,7 @@ $$2^{k-1} < x \le 2^k$$
      `❌ Excepción por fallo de página (Page Fault): La página 1 tiene bit de presencia 0 (ausente de RAM).`
    - La MMU **no calcula dirección física**, sino que suspende la instrucción y genera una **excepción por fallo de página** (Page Fault Exception) transfiriendo el control a la rutina del núcleo del sistema operativo para cargar la página desde el almacenamiento secundario a RAM.
 3. **Validación:**
-   - No hay correspondencia física porque la página no está cargada (Pág 1 con bit de presencia 0, por lo que no se encuentra actualmente en memoria principal).
+   - No hay correspondencia física porque la página no está cargada (Pág. 1 con bit de presencia 0, por lo que no se encuentra actualmente en memoria principal).
    - ✅ *Resuelve el **Ejercicio 8***.
 
 ---

@@ -129,7 +129,7 @@ const exercisesData = [
         id: 'ej8_tabla_paginas_traduccion',
         type: 'radio',
         title: 'Ejercicio 8: Traducción con Tabla de Páginas y Detección de Fallo de Página',
-        question: 'Un proceso de 56 KB con páginas de 4 KB tiene en su tabla: Pág 0 en Marco 1 (Presencia 1), Pág 1 con bit de presencia 0, por lo que no se encuentra actualmente en memoria principal, Pág 3 en Marco 3, Pág 4 en Marco 2, Pág 6 en Marco 0. Al intentar traducir la dirección virtual decimal 4100 (Pág 1, Disp 4), ¿qué ocurre?',
+        question: 'Un proceso de 56 KB con páginas de 4 KB tiene en su tabla: Pág. 0 en Marco 1, con presencia 1; Pág. 1 con presencia 0; Pág. 3 en Marco 3; Pág. 4 en Marco 2; y Pág. 6 en Marco 0. La página 1 no se encuentra actualmente en memoria principal. Al intentar traducir la dirección virtual decimal 4100 (Pág 1, Disp 4), ¿qué ocurre?',
         biblio: 'Silberschatz Cap. 8.4 / Diapositivas U6 pág. 35',
         labRef: { id: 'paging-simulator', name: 'Laboratorio 3: Paginación Simple MMU', badge: '🧪 Lab 3: Paginación MMU' },
         labHint: 'Ingresa manualmente Dirección Lógica = 4100 y pulsa el botón de traducción. Observa en la Tabla de Páginas que la Pág 1 tiene Bit de Presencia = 0 (no se encuentra en memoria principal) y la MMU reporta una Excepción por fallo de página.',
@@ -158,7 +158,7 @@ const exercisesData = [
     {
         id: 'ej10_segmentacion_violacion',
         type: 'switch',
-        title: 'Ejercicio 10: Validación de Límites y Trampa de Hardware en Segmentación',
+        title: 'Ejercicio 10: Validación de Límites y Excepción de Hardware en Segmentación',
         question: 'Dada la tabla de segmentos donde los valores se expresan en unidades direccionables (bytes) y el Segmento 1 tiene Base: 650 bytes y Límite: 180 bytes. ¿Qué acción emprende la MMU al solicitar la dirección lógica (1, 371), con desplazamiento de 371 bytes?',
         biblio: 'Silberschatz Cap. 8.6 / Diapositivas U6 pág. 38',
         labRef: { id: 'seg-simulator', name: 'Laboratorio 4: Segmentación MMU', badge: '🧪 Lab 4: Segmentación MMU' },
@@ -292,7 +292,7 @@ function loadSceneTP() {
     const stepEl = document.getElementById('alloc-step-num');
     if (stepEl) stepEl.textContent = `1/${allocRequests.length}`;
     renderMemoryBar();
-    logAlloc("📋 Caso Base cargado: 8 huecos libres ordenados por dirección física [20, 7, 10, 12, 5, 9, 15, 18 KB] (Total: 96 KB). Solicitudes sucesivas: P1=12KB, P2=9KB, P3=10KB.");
+    logAlloc("📋 Caso Base cargado: 8 huecos libres [20, 7, 10, 12, 5, 9, 15, 18 KB] (Total: 96 KB). Nota: Los huecos pertenecen a distintas zonas no contiguas de la memoria; los procesos ocupados que los separan se omiten en esta representación simplificada.");
     updateAllocBadges("Listo");
 }
 
@@ -338,7 +338,11 @@ function compactMemory() {
 }
 
 function resetAllocMemory() {
-    loadSceneTP();
+    if (currentAllocScene === 'btn-scene-frag') {
+        loadSceneFrag();
+    } else {
+        loadSceneTP();
+    }
 }
 
 function stepAlloc() {
@@ -994,8 +998,10 @@ function translatePaging() {
     if (!entry || !entry.presente) {
         resultBox.className = 'p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-sm';
         document.getElementById('paging-result-status').innerHTML = '❌ Excepción por fallo de página (Page Fault)';
-        document.getElementById('paging-res-frame').textContent = 'No presente en memoria principal';
-        document.getElementById('paging-res-calc').textContent = `La página ${p} tiene bit de presencia 0 (ausente en memoria principal)`;
+        document.getElementById('paging-res-frame').textContent = entry ? 'No presente en memoria principal' : 'No incluida en tabla';
+        document.getElementById('paging-res-calc').textContent = entry
+            ? `La página ${p} tiene bit de presencia 0`
+            : `La página ${p} no está incluida en el fragmento de tabla mostrado`;
         document.getElementById('paging-res-df').textContent = 'Excepción por fallo de página';
     } else {
         resultBox.className = 'p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-sm';
@@ -1058,12 +1064,12 @@ function translateSegmentation() {
         return;
     }
 
-    if (!Number.isInteger(d) || d < 0 || d >= seg.limite) {
+    if (d >= seg.limite) {
         badge.className = 'badge danger text-sm text-center py-2';
         badge.textContent = '💥 Excepción por violación de límite (trap): Segmentation Fault';
-        compEl.innerHTML = `<span class="text-rose-500 font-bold">${d < 0 ? 'DESPLAZAMIENTO NEGATIVO INVÁLIDO' : `${d} &ge; ${seg.limite} (DESPLAZAMIENTO EXCEDE EL LÍMITE)`}</span>`;
+        compEl.innerHTML = `<span class="text-rose-500 font-bold">${d} &ge; ${seg.limite} (DESPLAZAMIENTO EXCEDE EL LÍMITE)</span>`;
         calcEl.textContent = 'Hardware bloquea acceso a la memoria';
-        dfEl.textContent = 'Excepción de Núcleo';
+        dfEl.textContent = 'No se genera dirección física';
     } else {
         badge.className = 'badge success text-sm text-center py-2';
         badge.textContent = '✅ Acceso Válido por Hardware';
